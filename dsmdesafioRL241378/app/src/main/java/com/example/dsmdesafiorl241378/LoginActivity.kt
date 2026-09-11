@@ -13,13 +13,22 @@ import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
 import com.example.dsmdesafiorl241378.databinding.ActivityLoginBinding
+import com.facebook.CallbackManager
 import kotlinx.coroutines.launch
+import com.google.firebase.auth.OAuthProvider
+import com.facebook.login.LoginManager
+import com.facebook.FacebookCallback
+import com.facebook.login.LoginResult
+import com.facebook.FacebookException
+import com.google.firebase.auth.FacebookAuthProvider
+
 
 class LoginActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityLoginBinding
     private lateinit var auth: FirebaseAuth
     private lateinit var credentialManager: CredentialManager
+    private lateinit var callbackManager: CallbackManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -28,6 +37,7 @@ class LoginActivity : AppCompatActivity() {
 
         auth = FirebaseAuth.getInstance()
         credentialManager = CredentialManager.create(this)
+        callbackManager = CallbackManager.Factory.create()
 
         binding.btnLogin.setOnClickListener {
             login()
@@ -40,12 +50,41 @@ class LoginActivity : AppCompatActivity() {
         binding.btnGoogleSignIn.setOnClickListener {
             signInWithGoogle()
         }
+        binding.btnMicrosoftSignIn.setOnClickListener {
+            signInWithMicrosoft()
+        }
+        binding.btnFacebookSignIn.setOnClickListener {
+            signInWithFacebook()
+        }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        callbackManager.onActivityResult(requestCode, resultCode, data)
     }
 
     override fun onStart() {
         super.onStart()
-        if (auth.currentUser != null) {
-            goToMain()
+
+        val user = auth.currentUser
+
+        if (user != null) {
+
+            val usaCorreoYPassword = user.providerData.any {
+                it.providerId == "password"
+            }
+
+            if (usaCorreoYPassword) {
+
+                if (user.isEmailVerified) {
+                    goToMain()
+                } else {
+                    auth.signOut()
+                }
+
+            } else {
+                goToMain()
+            }
         }
     }
 
@@ -68,8 +107,30 @@ class LoginActivity : AppCompatActivity() {
             .addOnCompleteListener(this) { task ->
                 binding.progressBar.visibility = android.view.View.GONE
                 if (task.isSuccessful) {
-                    Toast.makeText(this, "Bienvenido", Toast.LENGTH_SHORT).show()
-                    goToMain()
+
+                    val user = auth.currentUser
+
+                    if (user != null && user.isEmailVerified) {
+
+                        Toast.makeText(
+                            this,
+                            "Bienvenido",
+                            Toast.LENGTH_SHORT
+                        ).show()
+
+                        goToMain()
+
+                    } else {
+
+                        Toast.makeText(
+                            this,
+                            "Debes verificar tu correo electrónico antes de iniciar sesión.",
+                            Toast.LENGTH_LONG
+                        ).show()
+
+                        auth.signOut()
+                    }
+
                 } else {
                     val exception = task.exception
                     val mensaje = when (exception) {
@@ -83,6 +144,7 @@ class LoginActivity : AppCompatActivity() {
             }
     }
 
+    // INICIO DE SESION CON GOOGLE
     private fun signInWithGoogle() {
         val googleIdOption = GetGoogleIdOption.Builder()
             .setFilterByAuthorizedAccounts(false)
@@ -113,6 +175,102 @@ class LoginActivity : AppCompatActivity() {
         }
     }
 
+    // INICIO DE SESION CON MICROSOFT
+    private fun signInWithMicrosoft() {
+
+        binding.progressBar.visibility = android.view.View.VISIBLE
+
+        val provider = OAuthProvider.newBuilder("microsoft.com")
+
+        provider.addCustomParameter("prompt", "select_account")
+
+        val pendingResultTask = auth.pendingAuthResult
+
+        if (pendingResultTask != null) {
+
+            pendingResultTask
+                .addOnSuccessListener {
+                    binding.progressBar.visibility = android.view.View.GONE
+
+                    Toast.makeText(
+                        this,
+                        "Bienvenido",
+                        Toast.LENGTH_SHORT
+                    ).show()
+
+                    goToMain()
+                }
+                .addOnFailureListener { e ->
+                    binding.progressBar.visibility = android.view.View.GONE
+                    manejarErrorOAuth(e)
+                }
+
+        } else {
+
+            auth.startActivityForSignInWithProvider(
+                this,
+                provider.build()
+            )
+                .addOnSuccessListener {
+                    binding.progressBar.visibility = android.view.View.GONE
+
+                    Toast.makeText(
+                        this,
+                        "Bienvenido",
+                        Toast.LENGTH_SHORT
+                    ).show()
+
+                    goToMain()
+                }
+                .addOnFailureListener { e ->
+                    binding.progressBar.visibility = android.view.View.GONE
+                    manejarErrorOAuth(e)
+                }
+        }
+    }
+
+    // INICIO DE SESION CON FACEBOOK
+    private fun signInWithFacebook() {
+        binding.progressBar.visibility = android.view.View.VISIBLE
+
+        LoginManager.getInstance().logInWithReadPermissions(
+            this,
+            listOf("email", "public_profile")
+        )
+
+        LoginManager.getInstance().registerCallback(callbackManager,
+            object : FacebookCallback<LoginResult> {
+                override fun onSuccess(result: LoginResult) {
+                    firebaseAuthWithFacebook(result.accessToken.token)
+                }
+
+                override fun onCancel() {
+                    binding.progressBar.visibility = android.view.View.GONE
+                    Toast.makeText(this@LoginActivity, "Inicio de sesión cancelado", Toast.LENGTH_SHORT).show()
+                }
+
+                override fun onError(error: FacebookException) {
+                    binding.progressBar.visibility = android.view.View.GONE
+                    Toast.makeText(this@LoginActivity, "Error con Facebook: ${error.message}", Toast.LENGTH_LONG).show()
+                }
+            })
+    }
+
+    private fun firebaseAuthWithFacebook(token: String) {
+        val credential = FacebookAuthProvider.getCredential(token)
+
+        auth.signInWithCredential(credential)
+            .addOnCompleteListener(this) { task ->
+                binding.progressBar.visibility = android.view.View.GONE
+                if (task.isSuccessful) {
+                    Toast.makeText(this, "Bienvenido", Toast.LENGTH_SHORT).show()
+                    goToMain()
+                } else {
+                    manejarErrorOAuth(task.exception)
+                }
+            }
+    }
+
     private fun handleSignIn(credential: androidx.credentials.Credential) {
         if (credential is androidx.credentials.CustomCredential &&
             credential.type == GoogleIdTokenCredential.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL
@@ -130,64 +288,30 @@ class LoginActivity : AppCompatActivity() {
 
         auth.signInWithCredential(credential)
             .addOnCompleteListener(this) { task ->
+                binding.progressBar.visibility = android.view.View.GONE
                 if (task.isSuccessful) {
-                    binding.progressBar.visibility = android.view.View.GONE
                     Toast.makeText(this, "Bienvenido", Toast.LENGTH_SHORT).show()
                     goToMain()
                 } else {
-                    val exception = task.exception
-                    if (exception is com.google.firebase.auth.FirebaseAuthUserCollisionException) {
-                        // Ya existe una cuenta con este correo (registrada con password).
-                        // Pedimos su password para vincular Google a esa cuenta existente.
-                        pedirPasswordParaVincular(credential)
-                    } else {
-                        binding.progressBar.visibility = android.view.View.GONE
-                        Toast.makeText(this, "Error: ${exception?.message}", Toast.LENGTH_LONG).show()
-                    }
+                    manejarErrorOAuth(task.exception)
                 }
             }
     }
-
-    private fun pedirPasswordParaVincular(googleCredential: com.google.firebase.auth.AuthCredential) {
-        binding.progressBar.visibility = android.view.View.GONE
-
-        val input = android.widget.EditText(this)
-        input.inputType = android.text.InputType.TYPE_CLASS_TEXT or android.text.InputType.TYPE_TEXT_VARIATION_PASSWORD
-        input.hint = "Contraseña"
-
-        android.app.AlertDialog.Builder(this)
-            .setTitle("Ya tienes una cuenta con este correo")
-            .setMessage("Ingresa tu contraseña para vincular tu cuenta de Google")
-            .setView(input)
-            .setPositiveButton("Vincular") { _, _ ->
-                val password = input.text.toString().trim()
-                val email = binding.etEmail.text.toString().trim()
-
-                binding.progressBar.visibility = android.view.View.VISIBLE
-
-                auth.signInWithEmailAndPassword(email, password)
-                    .addOnCompleteListener(this) { signInTask ->
-                        if (signInTask.isSuccessful) {
-                            auth.currentUser?.linkWithCredential(googleCredential)
-                                ?.addOnCompleteListener(this) { linkTask ->
-                                    binding.progressBar.visibility = android.view.View.GONE
-                                    if (linkTask.isSuccessful) {
-                                        Toast.makeText(this, "Cuentas vinculadas correctamente", Toast.LENGTH_SHORT).show()
-                                        goToMain()
-                                    } else {
-                                        Toast.makeText(this, "Error al vincular: ${linkTask.exception?.message}", Toast.LENGTH_LONG).show()
-                                    }
-                                }
-                        } else {
-                            binding.progressBar.visibility = android.view.View.GONE
-                            Toast.makeText(this, "Contraseña incorrecta", Toast.LENGTH_SHORT).show()
-                        }
-                    }
+    private fun manejarErrorOAuth(exception: Exception?) {
+        if (exception is com.google.firebase.auth.FirebaseAuthUserCollisionException) {
+            val emailConflicto = exception.email
+            if (emailConflicto != null) {
+                Toast.makeText(
+                    this,
+                    "Ya existe una cuenta con $emailConflicto. Verifica ese correo o inicia sesión con el método original para poder vincular.",
+                    Toast.LENGTH_LONG
+                ).show()
+            } else {
+                Toast.makeText(this, "Ya existe una cuenta con este correo.", Toast.LENGTH_LONG).show()
             }
-            .setNegativeButton("Cancelar") { _, _ ->
-                binding.progressBar.visibility = android.view.View.GONE
-            }
-            .show()
+        } else {
+            Toast.makeText(this, "Error: ${exception?.message}", Toast.LENGTH_LONG).show()
+        }
     }
 
     private fun goToMain() {

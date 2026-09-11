@@ -69,7 +69,8 @@ class RegisterActivity : AppCompatActivity() {
                                     Toast.LENGTH_LONG
                                 ).show()
                             }
-                            startActivity(Intent(this, MainActivity::class.java))
+                            auth.signOut()
+                            startActivity(Intent(this, LoginActivity::class.java))
                             finish()
                         }
                 } else {

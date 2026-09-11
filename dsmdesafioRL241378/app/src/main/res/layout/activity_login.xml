@@ -6,6 +6,13 @@
     android:padding="24dp"
     android:gravity="center">
 
+    <ProgressBar
+        android:id="@+id/progressBar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        android:layout_marginTop="16dp" />
+
     <EditText
         android:id="@+id/etEmail"
         android:layout_width="match_parent"
@@ -43,17 +50,24 @@
         android:text="O tambien puedes continuar con"
         android:layout_marginTop="16dp" />
 
-    <com.google.android.gms.common.SignInButton
+    <Button
         android:id="@+id/btnGoogleSignIn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp" />
-
-    <ProgressBar
-        android:id="@+id/progressBar"
+        android:layout_marginTop="16dp"
+        android:text="Continuar con Google"/>
+    <Button
+        android:id="@+id/btnMicrosoftSignIn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:visibility="gone"
-        android:layout_marginTop="16dp" />
+        android:layout_marginTop="16dp"
+        android:text="Continuar con Microsoft" />
+    <Button
+        android:id="@+id/btnFacebookSignIn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="Continuar con Facebook" />
+
 
 </LinearLayout>

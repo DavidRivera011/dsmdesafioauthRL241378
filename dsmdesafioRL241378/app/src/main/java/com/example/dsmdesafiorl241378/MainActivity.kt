@@ -80,8 +80,15 @@ class MainActivity : AppCompatActivity() {
         binding.btnLinkX.setOnClickListener {
             linkX()
         }
+        binding.btnGestionarMesas.setOnClickListener {
+            startActivity(Intent(this, MesaActivity::class.java))
+        }
+        binding.btnVerMesas.setOnClickListener {
+            startActivity(Intent(this, ListaMesasActivity::class.java))
+        }
 
         actualizarBotonesVinculados()
+        mostrarNombreUsuario()
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -96,6 +103,19 @@ class MainActivity : AppCompatActivity() {
         intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         startActivity(intent)
         finish()
+    }
+
+    private fun mostrarNombreUsuario() {
+        val user = auth.currentUser ?: return
+
+        val nombre = user.displayName
+            ?: user.providerData.firstOrNull {
+                it.providerId != "firebase" && !it.displayName.isNullOrBlank()
+            }?.displayName
+            ?: user.email
+            ?: "Usuario"
+
+        binding.tvUsername.text = "Hola, $nombre"
     }
 
     private fun actualizarBotonesVinculados() {

@@ -47,6 +47,8 @@ dependencies {
     // FIREBASE DEPENDENCIAS
     implementation(platform("com.google.firebase:firebase-bom:34.19.0"))
     implementation("com.google.firebase:firebase-analytics")
+    implementation("com.google.firebase:firebase-database")
+
     // AUTHENTICATION
     implementation("com.google.firebase:firebase-auth")
     // GOOGLE

@@ -50,18 +50,18 @@ class LoginActivity : AppCompatActivity() {
         binding.btnGoogleSignIn.setOnClickListener {
             signInWithGoogle()
         }
-        binding.btnMicrosoftSignIn.setOnClickListener {
-            signInWithMicrosoft()
-        }
+//        binding.btnMicrosoftSignIn.setOnClickListener {
+//            signInWithMicrosoft()
+//        }
         binding.btnFacebookSignIn.setOnClickListener {
             signInWithFacebook()
         }
         binding.btnGithubSignIn.setOnClickListener {
             signInWithGithub()
         }
-        binding.btnTwitterSignIn.setOnClickListener {
-            signInWithTwitter()
-        }
+//        binding.btnTwitterSignIn.setOnClickListener {
+//            signInWithTwitter()
+//        }
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {

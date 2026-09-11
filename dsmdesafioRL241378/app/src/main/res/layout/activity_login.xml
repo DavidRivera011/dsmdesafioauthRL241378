@@ -56,12 +56,12 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
         android:text="Continuar con Google"/>
-    <Button
-        android:id="@+id/btnMicrosoftSignIn"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:text="Continuar con Microsoft" />
+<!--    <Button-->
+<!--        android:id="@+id/btnMicrosoftSignIn"-->
+<!--        android:layout_width="wrap_content"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:layout_marginTop="16dp"-->
+<!--        android:text="Continuar con Microsoft" />-->
     <Button
         android:id="@+id/btnFacebookSignIn"
         android:layout_width="wrap_content"
@@ -74,12 +74,12 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
         android:text="Continuar con GitHub" />
-    <Button
-        android:id="@+id/btnTwitterSignIn"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:text="Continuar con X (Twitter)" />
+<!--    <Button-->
+<!--        android:id="@+id/btnTwitterSignIn"-->
+<!--        android:layout_width="wrap_content"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:layout_marginTop="16dp"-->
+<!--        android:text="Continuar con X (Twitter)" />-->
 
 
 </LinearLayout>

@@ -28,6 +28,8 @@
         </activity>
         <activity android:name=".RegisterActivity" android:exported="false" />
         <activity android:name=".MainActivity" android:exported="false"/>
+        <activity android:name=".MesaActivity" android:exported="false" />
+        <activity android:name=".ListaMesasActivity" android:exported="false" />
 
         <activity android:name="com.facebook.FacebookActivity"
             android:configChanges=

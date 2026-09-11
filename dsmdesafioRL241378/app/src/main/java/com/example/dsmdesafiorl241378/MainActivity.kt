@@ -48,7 +48,16 @@ class MainActivity : AppCompatActivity() {
 
         ViewCompat.setOnApplyWindowInsetsListener(binding.main) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
+
+            val padding = (20 * resources.displayMetrics.density).toInt()
+
+            v.setPadding(
+                padding + systemBars.left,
+                padding + systemBars.top,
+                padding + systemBars.right,
+                padding + systemBars.bottom
+            )
+
             insets
         }
 
@@ -64,6 +73,12 @@ class MainActivity : AppCompatActivity() {
         }
         binding.btnLinkFacebook.setOnClickListener {
             linkFacebook()
+        }
+        binding.btnLinkGithub.setOnClickListener {
+            linkGithub()
+        }
+        binding.btnLinkX.setOnClickListener {
+            linkX()
         }
 
         actualizarBotonesVinculados()
@@ -91,6 +106,8 @@ class MainActivity : AppCompatActivity() {
         binding.btnLinkGoogle.isEnabled = !providers.contains("google.com")
         binding.btnLinkMicrosoft.isEnabled = !providers.contains("microsoft.com")
         binding.btnLinkFacebook.isEnabled = !providers.contains("facebook.com")
+        binding.btnLinkGithub.isEnabled = !providers.contains("github.com")
+        binding.btnLinkX.isEnabled = !providers.contains("twitter.com")
     }
 
     // VINCULAR GOOGLE
@@ -150,6 +167,25 @@ class MainActivity : AppCompatActivity() {
             }
     }
 
+    // VINCULAR GITHUB
+    private fun linkGithub() {
+        binding.progressBar.visibility = android.view.View.VISIBLE
+
+        val provider = OAuthProvider.newBuilder("github.com")
+        provider.scopes = listOf("user:email")
+
+        auth.currentUser?.startActivityForLinkWithProvider(this, provider.build())
+            ?.addOnSuccessListener {
+                binding.progressBar.visibility = android.view.View.GONE
+                actualizarBotonesVinculados()
+                Toast.makeText(this, "GitHub vinculado correctamente", Toast.LENGTH_SHORT).show()
+            }
+            ?.addOnFailureListener { e ->
+                binding.progressBar.visibility = android.view.View.GONE
+                manejarErrorDeVinculo(e)
+            }
+    }
+
     // VINCULAR FACEBOOK
     private fun linkFacebook() {
         binding.progressBar.visibility = android.view.View.VISIBLE
@@ -176,6 +212,32 @@ class MainActivity : AppCompatActivity() {
                     Toast.makeText(this@MainActivity, "Error con Facebook: ${error.message}", Toast.LENGTH_LONG).show()
                 }
             })
+    }
+
+    // VINCULAR X (TWITTER)
+    private fun linkX() {
+        binding.progressBar.visibility = android.view.View.VISIBLE
+
+        val provider = OAuthProvider.newBuilder("twitter.com")
+
+        auth.currentUser?.startActivityForLinkWithProvider(
+            this,
+            provider.build()
+        )
+            ?.addOnSuccessListener {
+                binding.progressBar.visibility = android.view.View.GONE
+                actualizarBotonesVinculados()
+
+                Toast.makeText(
+                    this,
+                    "X vinculado correctamente",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+            ?.addOnFailureListener { e ->
+                binding.progressBar.visibility = android.view.View.GONE
+                manejarErrorDeVinculo(e)
+            }
     }
 
     private fun vincularProveedor(credential: AuthCredential, nombreProveedor: String) {

@@ -56,6 +56,12 @@ class LoginActivity : AppCompatActivity() {
         binding.btnFacebookSignIn.setOnClickListener {
             signInWithFacebook()
         }
+        binding.btnGithubSignIn.setOnClickListener {
+            signInWithGithub()
+        }
+        binding.btnTwitterSignIn.setOnClickListener {
+            signInWithTwitter()
+        }
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -229,6 +235,60 @@ class LoginActivity : AppCompatActivity() {
         }
     }
 
+    // INICIO DE SESION CON GITHUB
+    private fun signInWithGithub() {
+
+        binding.progressBar.visibility = android.view.View.VISIBLE
+
+        val provider = OAuthProvider.newBuilder("github.com")
+
+        provider.scopes = listOf("user:email")
+
+        val pendingResultTask = auth.pendingAuthResult
+
+        if (pendingResultTask != null) {
+
+            pendingResultTask
+                .addOnSuccessListener {
+                    binding.progressBar.visibility = android.view.View.GONE
+
+                    Toast.makeText(
+                        this,
+                        "Bienvenido",
+                        Toast.LENGTH_SHORT
+                    ).show()
+
+                    goToMain()
+                }
+                .addOnFailureListener { e ->
+                    binding.progressBar.visibility = android.view.View.GONE
+                    manejarErrorOAuth(e)
+                }
+
+        } else {
+
+            auth.startActivityForSignInWithProvider(
+                this,
+                provider.build()
+            )
+                .addOnSuccessListener {
+                    binding.progressBar.visibility = android.view.View.GONE
+
+                    Toast.makeText(
+                        this,
+                        "Bienvenido",
+                        Toast.LENGTH_SHORT
+                    ).show()
+
+                    goToMain()
+                }
+                .addOnFailureListener { e ->
+                    binding.progressBar.visibility = android.view.View.GONE
+                    manejarErrorOAuth(e)
+                }
+        }
+    }
+
     // INICIO DE SESION CON FACEBOOK
     private fun signInWithFacebook() {
         binding.progressBar.visibility = android.view.View.VISIBLE
@@ -254,6 +314,43 @@ class LoginActivity : AppCompatActivity() {
                     Toast.makeText(this@LoginActivity, "Error con Facebook: ${error.message}", Toast.LENGTH_LONG).show()
                 }
             })
+    }
+
+    // INICIO DE SESION CON TWITTER/X
+    private fun signInWithTwitter() {
+
+        binding.progressBar.visibility = android.view.View.VISIBLE
+
+        val provider = OAuthProvider.newBuilder("twitter.com")
+
+        val pendingResultTask = auth.pendingAuthResult
+
+        if (pendingResultTask != null) {
+
+            pendingResultTask
+                .addOnSuccessListener {
+                    binding.progressBar.visibility = android.view.View.GONE
+                    Toast.makeText(this, "Bienvenido", Toast.LENGTH_SHORT).show()
+                    goToMain()
+                }
+                .addOnFailureListener { e ->
+                    binding.progressBar.visibility = android.view.View.GONE
+                    manejarErrorOAuth(e)
+                }
+
+        } else {
+
+            auth.startActivityForSignInWithProvider(this, provider.build())
+                .addOnSuccessListener {
+                    binding.progressBar.visibility = android.view.View.GONE
+                    Toast.makeText(this, "Bienvenido", Toast.LENGTH_SHORT).show()
+                    goToMain()
+                }
+                .addOnFailureListener { e ->
+                    binding.progressBar.visibility = android.view.View.GONE
+                    manejarErrorOAuth(e)
+                }
+        }
     }
 
     private fun firebaseAuthWithFacebook(token: String) {
@@ -298,6 +395,7 @@ class LoginActivity : AppCompatActivity() {
             }
     }
     private fun manejarErrorOAuth(exception: Exception?) {
+        android.util.Log.e("LOGIN_DEBUG", "Error completo: ${exception?.message}", exception)
         if (exception is com.google.firebase.auth.FirebaseAuthUserCollisionException) {
             val emailConflicto = exception.email
             if (emailConflicto != null) {

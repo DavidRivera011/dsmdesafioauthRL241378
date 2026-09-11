@@ -1,3 +1,16 @@
 <resources>
+    <string name="default_web_client_id">1072165648765-vp4kqj9jsqt806mg15aakcr87qo8p78q.apps.googleusercontent.com</string>
+
+    <string name="facebook_app_id">2492971641473300</string>
+    <string name="fb_login_protocol_scheme">fb2492971641473300</string>
+    <string name="facebook_client_token">7491dee17c5a84d86358bb160deddc14</string>
+
     <string name="app_name">dsmdesafioRL241378</string>
+    <string name="correo_electronico">Correo electronico</string>
+    <string name="contrasena">Contraseña</string>
+    <string name="no_tienes_cuenta_reg_strate">¿No tienes cuenta? Regístrate</string>
+    <string name="iniciar_sesi_n">Iniciar sesión</string>
+    <string name="contrase_a">Contraseña</string>
+    <string name="correo_electr_nico">Correo electrónico</string>
+    <string name="cerrar_sesion">Cerrar sesión</string>
 </resources>

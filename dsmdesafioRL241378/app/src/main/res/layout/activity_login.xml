@@ -36,6 +36,19 @@
         android:layout_marginTop="16dp"
         android:textColor="#1976D2" />
 
+    <TextView
+        android:id="@+id/tvOpcional"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="O tambien puedes continuar con"
+        android:layout_marginTop="16dp" />
+
+    <com.google.android.gms.common.SignInButton
+        android:id="@+id/btnGoogleSignIn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp" />
+
     <ProgressBar
         android:id="@+id/progressBar"
         android:layout_width="wrap_content"

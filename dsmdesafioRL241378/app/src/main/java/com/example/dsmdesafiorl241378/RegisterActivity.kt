@@ -48,12 +48,32 @@ class RegisterActivity : AppCompatActivity() {
 
         auth.createUserWithEmailAndPassword(email, password)
             .addOnCompleteListener(this) { task ->
-                binding.progressBar.visibility = android.view.View.GONE
                 if (task.isSuccessful) {
-                    Toast.makeText(this, "Cuenta creada exitosamente", Toast.LENGTH_SHORT).show()
-                    startActivity(Intent(this, MainActivity::class.java))
-                    finish()
+                    // Enviamos el correo de verificación ANTES de continuar.
+                    // Esto es clave para que, si luego el usuario entra con Google
+                    // usando el mismo correo, Firebase combine ambos proveedores
+                    // en vez de invalidar el password por no estar verificado.
+                    auth.currentUser?.sendEmailVerification()
+                        ?.addOnCompleteListener { verifyTask ->
+                            binding.progressBar.visibility = android.view.View.GONE
+                            if (verifyTask.isSuccessful) {
+                                Toast.makeText(
+                                    this,
+                                    "Cuenta creada. Revisa tu correo para verificarlo.",
+                                    Toast.LENGTH_LONG
+                                ).show()
+                            } else {
+                                Toast.makeText(
+                                    this,
+                                    "Cuenta creada, pero no se pudo enviar el correo de verificación.",
+                                    Toast.LENGTH_LONG
+                                ).show()
+                            }
+                            startActivity(Intent(this, MainActivity::class.java))
+                            finish()
+                        }
                 } else {
+                    binding.progressBar.visibility = android.view.View.GONE
                     Toast.makeText(
                         this,
                         "Error: ${task.exception?.message}",
